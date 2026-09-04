@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LocalMSG</title>
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative; /* Needed for the overlay */
+    }
+
+    /* THE LOGIN OVERLAY */
+    #login-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #1e1e1e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .login-box {
+      background: #252526;
+      padding: 40px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+    #name-input {
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: none;
+      background: #3c3c3c;
+      color: white;
+      margin-top: 15px;
+      outline: none;
+      width: 200px;
+    }
+
+    /* THE CHAT UI */
+    #chat-history {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      padding: 10px 15px;
+      border-radius: 8px;
+      width: fit-content;
+      max-width: 80%;
+      /* THE NO-SPACES WRAP FIX */
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    
+    /* THE SCANNING FIX */
+    .my-message {
+      background: #404040; 
+      align-self: flex-start; 
+    }
+    .other-message {
+      background: #2d2d30; 
+      align-self: flex-start; 
+    }
+    .system {
+      color: #00ffcc;
+      font-size: 0.9em;
+      align-self: center;
+      background: transparent;
+    }
+    #input-area {
+      padding: 20px;
+      background: #252526;
+      display: flex;
+    }
+    #mute-btn {
+      background: #3c3c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 0 15px;
+      margin-right: 10px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #mute-btn:hover {
+      background: #505050;
+    }
+    #message-input {
+      flex-grow: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 5px;
+      background: #3c3c3c;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- THE GATEKEEPER -->
+  <div id="login-overlay">
+    <div class="login-box">
+      <h2 style="margin:0; color:#00ffcc;">Identify Yourself</h2>
+      <input type="text" id="name-input" placeholder="Enter your name..." autofocus>
+    </div>
+  </div>
+
+  <div id="chat-history"></div>
+
+  <div id="input-area">
+    <button id="mute-btn" title="Toggle Sound">🔊</button>
+    <input type="text" id="message-input" placeholder="Type a message and press Enter...">
+  </div>
+
+  <script src="./renderer.js"></script>
+</body>
+</html>
