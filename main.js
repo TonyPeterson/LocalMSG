@@ -1,5 +1,11 @@
 const { app, BrowserWindow } = require('electron');
 
+if (!app.isPackaged) {
+  require('electron-reload')(__dirname, {
+    electron: require(`${__dirname}/node_modules/electron`)
+  });
+}
+
 app.disableHardwareAcceleration();
 
 function createWindow () {

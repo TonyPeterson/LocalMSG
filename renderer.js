@@ -6,36 +6,88 @@ const BROADCAST_ADDR = '10.0.0.255';
 const peers = new Set();
 let myName = ''; 
 let isMuted = false;
+let isScreenprint = false;
 
 // Grab the HTML elements
 const chatHistory = document.getElementById('chat-history');
 const messageInput = document.getElementById('message-input');
 const loginOverlay = document.getElementById('login-overlay');
 const nameInput = document.getElementById('name-input');
-const muteBtn = document.getElementById('mute-btn');
 
-// Load the trauma-inducing sound effect
+// Menu Elements
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const dropdownMenu = document.getElementById('dropdown-menu');
+const muteBtn = document.getElementById('mute-btn');
+const themeBtn = document.getElementById('theme-btn');
+
 const pingSound = new Audio('./ResettiPing.wav'); 
+const rand = (min, max) => (Math.random() * (max - min) + min).toFixed(2);
+
+// TOGGLE THE HAMBURGER MENU
+hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Stops the document click listener from immediately closing it
+    dropdownMenu.classList.toggle('show');
+});
+
+// CLOSE THE MENU IF YOU CLICK ANYWHERE ELSE ON THE SCREEN
+document.addEventListener('click', (e) => {
+    if (!dropdownMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+        dropdownMenu.classList.remove('show');
+    }
+});
 
 // THE MUTE TOGGLE
 muteBtn.addEventListener('click', () => {
     isMuted = !isMuted;
-    muteBtn.textContent = isMuted ? '🔇' : '🔊'; 
+    muteBtn.textContent = isMuted ? '🔊 Unmute Chat' : '🔇 Mute Chat'; 
+});
+
+// THE THEME TOGGLE
+themeBtn.addEventListener('click', () => {
+    isScreenprint = !isScreenprint;
+    document.body.classList.toggle('screenprint-mode', isScreenprint);
+    themeBtn.textContent = isScreenprint ? '🌙 Dark Mode' : '🎨 Print Mode'; 
 });
 
 // Helper function to draw messages
-function addMessageToScreen(text, isSystem = false, isMe = false) {
-    const div = document.createElement('div');
-    
+// The updated draw function
+function addMessageToScreen(name, text, isSystem = false, isMe = false) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message-wrapper';
+
     if (isSystem) {
-        div.className = 'message system';
+        const sysDiv = document.createElement('div');
+        sysDiv.className = 'message system';
+        sysDiv.textContent = text;
+        wrapper.appendChild(sysDiv);
     } else {
-        // Assign the correct class based on who sent it
-        div.className = isMe ? 'message my-message' : 'message other-message';
+        // Build the tiny name label
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'sender-name';
+        nameDiv.textContent = name; // No colon!
+
+        // Build the actual text bubble
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = isMe ? 'message my-message' : 'message other-message';
+        bubbleDiv.textContent = text;
+        
+        // Random misregister coordinates for the bubble
+        bubbleDiv.style.setProperty('--bg-x', `${rand(-3, 4)}px`);
+        bubbleDiv.style.setProperty('--bg-y', `${rand(-3, 4)}px`);
+        bubbleDiv.style.setProperty('--bg-rot', `${rand(-1.5, 1.5)}deg`);
+        bubbleDiv.style.setProperty('--bg-skew', `${rand(-2, 2)}deg`);
+
+        bubbleDiv.style.setProperty('--out-x', `${rand(-2, 3)}px`);
+        bubbleDiv.style.setProperty('--out-y', `${rand(-2, 3)}px`);
+        bubbleDiv.style.setProperty('--out-rot', `${rand(-1.5, 1.5)}deg`);
+        bubbleDiv.style.setProperty('--out-skew', `${rand(-2, 2)}deg`);
+
+        // Pack them into the wrapper
+        wrapper.appendChild(nameDiv);
+        wrapper.appendChild(bubbleDiv);
     }
     
-    div.textContent = text;
-    chatHistory.appendChild(div);
+    chatHistory.appendChild(wrapper);
     chatHistory.scrollTop = chatHistory.scrollHeight; 
 }
 
@@ -44,19 +96,13 @@ nameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         myName = nameInput.value.trim() || `User_${Math.floor(Math.random() * 1000)}`;
         
-        // Hide the login screen
         loginOverlay.style.display = 'none';
-        
-        // Put the typing cursor in the chat box
         messageInput.focus();
-        
-        // Boot the network
         startNetwork();
     }
 });
 
 function startNetwork() {
-    // 1. THE LISTENER
     socket.on('message', (msg, rinfo) => {
         try {
             const data = JSON.parse(msg);
@@ -64,32 +110,27 @@ function startNetwork() {
             if (data.type === 'DISCOVERY' && data.name !== myName) {
                 if (!peers.has(rinfo.address)) {
                     peers.add(rinfo.address);
-                    addMessageToScreen(`[System] ${data.name} joined the network.`, true);
+                    addMessageToScreen('', `[System] ${data.name} joined the network.`, true);
                 }
             } 
             else if (data.type === 'CHAT' && data.name !== myName) {
-                // Only play the sound if the chat is not muted
                 if (!isMuted) {
                     pingSound.play().catch(err => console.log("Audio failed:", err));
                 }
-                
-                addMessageToScreen(`${data.name}: ${data.text}`, false, false);
+                addMessageToScreen(data.name, data.text, false, false);
             }
             else if (data.type === 'DISCONNECT' && data.name !== myName) {
                 if (peers.has(rinfo.address)) {
                     peers.delete(rinfo.address); 
-                    addMessageToScreen(`[System] ${data.name} has left the chat.`, true);
+                    addMessageToScreen('', `[System] ${data.name} has left the chat.`, true);
                 }
             }
-        } catch (e) {
-            // Ignore garbage data
-        }
+        } catch (e) {}
     });
 
-    // 2. THE YELLER
     socket.bind(PORT, () => {
         socket.setBroadcast(true);
-        addMessageToScreen(`Welcome, ${myName}.`, true);
+        addMessageToScreen('', `Welcome, ${myName}.`, true);
 
         setInterval(() => {
             const message = Buffer.from(JSON.stringify({ type: 'DISCOVERY', name: myName }));
@@ -97,13 +138,12 @@ function startNetwork() {
         }, 3000);
     });
 
-    // 3. THE TYPER
     messageInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && messageInput.value.trim() !== '') {
             const text = messageInput.value;
-            messageInput.value = ''; // Clear the box
+            messageInput.value = ''; 
 
-            addMessageToScreen(`You: ${text}`, false, true);
+            addMessageToScreen('You', text, false, true);
 
             const message = Buffer.from(JSON.stringify({ 
                 type: 'CHAT', 
@@ -117,7 +157,6 @@ function startNetwork() {
         }
     });
 
-    // 4. GRACEFUL EXIT
     window.addEventListener('beforeunload', () => {
         const message = Buffer.from(JSON.stringify({ type: 'DISCONNECT', name: myName }));
         for (const ip of peers) {
