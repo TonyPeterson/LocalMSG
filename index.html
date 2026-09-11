@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>LocalMSG</title>
   <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-  
+
+  <!-- THE GATEKEEPER -->
   <div id="login-overlay">
-    <div class="login-box">
-      <h2 style="margin:0; color:#00ffcc;">Identify Yourself</h2>
-      <input type="text" id="name-input" placeholder="Enter your name..." autofocus>
-    </div>
+    <input type="text" id="name-input" placeholder="name" autofocus autocomplete="off" spellcheck="false">
   </div>
 
   <div id="chat-history"></div>
 
   <div id="input-area">
     <input type="text" id="message-input" placeholder="Type a message and press Enter...">
-    
+
     <div id="hamburger-container">
       <button id="hamburger-btn" title="Menu">☰</button>
       <div id="dropdown-menu">
-        <button id="theme-btn" class="menu-item">🎨 Print Mode</button>
+        <button class="menu-item theme-btn" data-theme="dark">🌙 Dark Mode</button>
+        <button class="menu-item theme-btn" data-theme="print">🎨 Print Mode</button>
+        <button class="menu-item theme-btn" data-theme="toyland">🧸 ToyLand</button>
         <button id="mute-btn" class="menu-item">🔇 Mute Chat</button>
       </div>
     </div>
   </div>
 
   <script src="./renderer.js"></script>
+  <svg width="0" height="0" style="position: absolute;">
+    <defs>
+      <clipPath id="squircle" clipPathUnits="objectBoundingBox">
+        <path d="M 0.5 0 C 0.9 0, 1 0.1, 1 0.5 C 1 0.9, 0.95 1, 0.5 1 C 0.1 1, 0 0.9, 0 0.5 C 0 0.1, 0.05 0, 0.5 0 Z" />
+      </clipPath>
+    </defs>
+  </svg>
 </body>
+
 </html>

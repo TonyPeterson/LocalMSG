@@ -1,10 +1,146 @@
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./fonts/Sniglet-Regular.ttf') format('truetype');
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: 'Sniglet';
+  src: url('./fonts/Sniglet-ExtraBold.ttf') format('truetype');
+  font-weight: 900;
+}
+
 /* =========================================
-   BASE STYLES (DARK MODE)
+   BASE STYLES & VARIABLES
    ========================================= */
+:root {
+  /* DARK MODE (DEFAULT) */
+  --bg-color: #1e1e1e;
+  --text-color: #ffffff;
+  --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  --bg-image: none;
+  --bg-size: auto;
+  --bg-position: 0 0;
+
+  --system-color: #00ffcc;
+  --system-bg: transparent;
+  --system-font-weight: normal;
+  --system-text-transform: none;
+  --system-padding: 0;
+  --system-max-width: none;
+  --system-text-align: center;
+  --system-border-radius: 0;
+  --system-align-self: center;
+  --system-tail-display: none;
+
+  --msg-padding: 12px 18px;
+  --msg-margin: 0;
+  --msg-color: #ffffff;
+  --msg-border-radius: 12px;
+  --msg-bg: transparent;
+
+  --my-msg-bg: #312a34;
+  --other-msg-bg: #333819;
+
+  --msg-before-bg: transparent;
+  --msg-after-border: none;
+
+  --sender-color: #888;
+  --sender-margin: auto auto -16px 12px;
+
+  --input-area-bg: #00000033;
+  --message-input-bg: #00000044;
+  --message-input-color: #ffffff;
+}
+
+/* =========================================
+   THEMES
+   ========================================= */
+
+/* PRINT MODE */
+body[data-theme="print"] {
+  --bg-color: #e5e5df;
+  --text-color: #1e1e1e;
+
+  --bg-image: radial-gradient(#c2c2bc 15%, transparent 16%), radial-gradient(#c2c2bc 15%, transparent 16%);
+  --bg-size: 10px 10px;
+  --bg-position: 0 0, 5px 5px;
+
+  --message-input-bg: #ffffffbb;
+  --message-input-color: #1e1e1e;
+
+  --msg-padding: 12px 18px;
+  --msg-margin: 8px 5px;
+  --msg-color: #1e1e1e;
+  --msg-border-radius: 0;
+
+  --sender-color: #1e1e1e;
+  --sender-margin: auto auto -6px 6px;
+
+  --my-msg-bg: transparent;
+  --other-msg-bg: transparent;
+
+  --msg-after-border: 2px solid #2d2d30;
+}
+
+body[data-theme="print"] .my-message {
+  --msg-before-bg: #e0f28e;
+}
+
+body[data-theme="print"] .other-message {
+  --msg-before-bg: #e57598;
+}
+
+/* TOYLAND MODE */
+body[data-theme="toyland"] {
+  --bg-color: #b8dcf6;
+  --text-color: #125c71;
+  --font-family: 'Sniglet', 'Segoe UI', sans-serif;
+
+  --my-msg-bg: transparent;
+  --other-msg-bg: transparent;
+
+  --msg-color: #125c71;
+  --msg-border-radius: 0;
+  --msg-padding: 12px 18px;
+  --msg-margin: 8px 5px;
+
+  --msg-after-border: 2px solid #125c71;
+
+  --sender-color: #125c71;
+  --sender-margin: auto auto -6px 6px;
+}
+
+body[data-theme="toyland"] .my-message {
+  --msg-before-bg: #faef97;
+}
+
+body[data-theme="toyland"] .other-message {
+  --msg-before-bg: #ffcdd2;
+}
+
+body[data-theme="toyland"] .message.system {
+  --system-align-self: end;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: 1.25rem;
+  line-height: 0.85em;
+}
+
+body[data-theme="toyland"] .message:not(.system) {
+  border-radius: 0;
+}
+
+/* Base body styles */
 body {
-  background-color: #1e1e1e;
-  color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  background-image: var(--bg-image);
+  background-size: var(--bg-size);
+  background-position: var(--bg-position);
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -20,30 +156,33 @@ body {
   right: 0;
   bottom: 0;
   background: #1e1e1e;
+  /* Or transparent if you want the theme color to show */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 100;
-}
-
-.login-box {
-  background: #2b2426;
-  padding: 36px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 15px -1px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  /* Prevents massive letters from causing scrollbars */
 }
 
 #name-input {
-  padding: 12px;
-  font-size: 16px;
-  border-radius: 6px;
+  background: transparent;
   border: none;
-  background: #3c3c3c;
-  color: white;
-  margin-top: 15px;
   outline: none;
-  width: 200px;
+  color: white;
+  text-align: center;
+  width: 100dvw;
+  line-height: 1;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+
+  /* Lowered from 130vw to 105vw to prevent screen overflow */
+  font-size: min(90dvh, calc(150dvw / var(--char-count, 4)));
+}
+
+#name-input::placeholder {
+  color: #3c3c3c;
 }
 
 /* CHAT UI */
@@ -57,41 +196,127 @@ body {
 }
 
 .system {
-  color: #00ffcc;
+  color: var(--system-color);
+  background: var(--system-bg);
+  font-weight: var(--system-font-weight);
+  text-transform: var(--system-text-transform);
+  padding: var(--system-padding);
+  max-width: var(--system-max-width);
+  text-align: var(--system-text-align);
+  border-radius: var(--system-border-radius);
+  align-self: var(--system-align-self);
   font-size: 0.9em;
-  align-self: center;
+  position: relative;
+}
+
+.system::after {
+  content: '';
+  display: var(--system-tail-display);
+  position: absolute;
+  bottom: -10px;
+  right: 20px;
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: #125c71 transparent transparent transparent;
+}
+
+body[data-theme="toyland"] .system {
+  max-width: 150px;
+  color: #ffffff;
+  line-height: 1.2;
+  padding: 1.5rem 1rem;
   background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+body[data-theme="toyland"] .system::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #125c71;
+  clip-path: url(#squircle);
+  z-index: -1;
+  transform: none;
+  border-radius: 0;
+}
+
+body[data-theme="toyland"] .system::after {
+  content: '';
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  top: 5px;
+  right: -15px;
+  bottom: auto;
+  left: auto;
+  background-color: #125c71;
+  clip-path: polygon(0 20%, 100% 0, 30% 90%);
+  z-index: -2;
+  border: none;
+  display: block;
+  transform: none;
+  border-radius: 0;
 }
 
 /* DEFAULT MESSAGE STYLING */
 .message {
-  padding: 12px 18px;
-  border-radius: 12px;
+  padding: var(--msg-padding);
+  margin: var(--msg-margin);
+  border-radius: var(--msg-border-radius);
+  color: var(--msg-color);
   width: fit-content;
   max-width: 80%;
   overflow-wrap: break-word;
   word-break: break-word;
+  position: relative;
 }
 
 .my-message {
-  background: #312a34;
+  background: var(--my-msg-bg);
   align-self: flex-start;
 }
 
 .other-message {
-  background: #333819;
+  background: var(--other-msg-bg);
   align-self: flex-start;
+}
+
+.message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--msg-before-bg);
+  z-index: -2;
+  transform: translate(var(--bg-x, 0px), var(--bg-y, 0px)) rotate(var(--bg-rot, 0deg)) skewX(var(--bg-skew, 0deg));
+  border-radius: inherit;
+}
+
+.message::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: var(--msg-after-border);
+  z-index: -1;
+  transform: translate(var(--out-x, 0px), var(--out-y, 0px)) rotate(var(--out-rot, 0deg)) skewX(var(--out-skew, 0deg));
+  border-radius: inherit;
 }
 
 /* MENU & INPUT BOX */
 #input-area {
   padding: 12px;
-    background: #00000033;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin: auto 12px 0px 12px;
-    border-radius: 24px 24px 0px 0px;
+  background: var(--input-area-bg);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: auto 12px 0px 12px;
+  border-radius: 24px 24px 0px 0px;
 }
 
 #message-input {
@@ -99,8 +324,8 @@ body {
   padding: 15px;
   border: none;
   border-radius: 12px;
-  background: #00000044;
-  color: white;
+  background: var(--message-input-bg);
+  color: var(--message-input-color);
   font-size: 16px;
   outline: none;
 }
@@ -130,10 +355,8 @@ body {
 
 #dropdown-menu {
   display: none;
-  /* Hidden by default */
   position: absolute;
   bottom: calc(100% + 15px);
-  /* Pops up above the hamburger button */
   right: 0;
   background: #2b2426;
   border-radius: 8px;
@@ -176,81 +399,7 @@ body {
 
 .sender-name {
   font-size: 11px;
-  margin: auto auto -16px 12px;
-  color: #888;
-  /* Subtle gray for Dark Mode */
+  margin: var(--sender-margin);
+  color: var(--sender-color);
   z-index: 2;
-}
-
-/* OVERRIDE FOR LIGHT MODE */
-body.screenprint-mode .sender-name {
-  color: #1e1e1e;
-  /* Dark print ink for Light Mode */
-}
-
-
-/* =========================================
-   LIGHT MODE / SCREENPRINT OVERRIDES 
-   ========================================= */
-body.screenprint-mode {
-      background-color: #e5e5df;
-      
-      /* Draw TWO identical dot patterns, comma separated */
-      background-image: 
-        radial-gradient(#c2c2bc 15%, transparent 16%),
-        radial-gradient(#c2c2bc 15%, transparent 16%);
-      
-      background-size: 10px 10px; 
-      
-      /* Keep the first at 0,0, but shift the second one by exactly half the size (5px) */
-      background-position: 0 0, 5px 5px;
-    }
-
-body.screenprint-mode#message-input {
-  background: #ffffffbb;
-}
-
-body.screenprint-mode .message {
-  position: relative;
-  padding: 12px 18px;
-  margin: 8px 5px;
-  color: #1e1e1e;
-  background: transparent;
-  border-radius: 0;
-}
-
-body.screenprint-mode .sender-name {
-  margin: auto auto -6px 6px;
-}
-
-body.screenprint-mode .my-message {
-  --bg-color: #e0f28e;
-}
-
-body.screenprint-mode .other-message {
-  --bg-color: #e57598;
-}
-
-body.screenprint-mode .message::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: var(--bg-color, #00000011);
-  z-index: -2;
-  transform: translate(var(--bg-x, 2px), var(--bg-y, 2px)) rotate(var(--bg-rot, -1deg)) skewX(var(--bg-skew, 1deg));
-}
-
-body.screenprint-mode .message::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border: 2px solid #2d2d30;
-  z-index: -1;
-  transform: translate(var(--out-x, -1px), var(--out-y, -1px)) rotate(var(--out-rot, 1deg)) skewX(var(--out-skew, -1deg));
 }
