@@ -403,3 +403,62 @@ body[data-theme="toyland"] .system::after {
   color: var(--sender-color);
   z-index: 2;
 }
+
+/* THE BOUNCE ANIMATION */
+@keyframes messageBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.95);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* Fires the animation instantly when a message hits the DOM */
+  animation: messageBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* BACKGROUND TOGGLER UI */
+.bg-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  border-bottom: 1px solid #3c3c3c;
+  font-size: 13px;
+  color: #ccc;
+  background: #231d1f;
+  /* Slightly darker to indent it under Dark Mode */
+}
+
+.bg-btn {
+  background: transparent;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.bg-btn:hover {
+  background: #505050;
+  border-color: #888;
+}

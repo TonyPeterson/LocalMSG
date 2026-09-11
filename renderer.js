@@ -1,5 +1,7 @@
 const dgram = require('dgram');
-const { shell } = require('electron'); // New: Lets us open URLs safely in the OS browser
+const { shell } = require('electron'); // For safely opening URLs in the OS browser
+const fs = require('fs');
+const path = require('path');
 
 const socket = dgram.createSocket('udp4');
 const PORT = 41234;
@@ -26,7 +28,9 @@ const rand = (min, max) => (Math.random() * (max - min) + min).toFixed(2);
 // Force the blinking cursor on load
 nameInput.focus();
 
-// TOGGLE THE HAMBURGER MENU
+// =========================================
+// MENU TOGGLES
+// =========================================
 hamburgerBtn.addEventListener('click', (e) => {
     e.stopPropagation(); 
     dropdownMenu.classList.toggle('show');
@@ -38,13 +42,11 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// THE MUTE TOGGLE
 muteBtn.addEventListener('click', () => {
     isMuted = !isMuted;
     muteBtn.textContent = isMuted ? '🔊 Unmute Chat' : '🔇 Mute Chat';
 });
 
-// THE THEME TOGGLES
 themeBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         const theme = e.target.getAttribute('data-theme');
@@ -57,7 +59,63 @@ themeBtns.forEach(btn => {
     });
 });
 
-// URL PARSER (Safely turns text into clickable anchor tags)
+// =========================================
+// DYNAMIC BACKGROUND LOADER
+// =========================================
+const bgPrevBtn = document.getElementById('bg-prev');
+const bgNextBtn = document.getElementById('bg-next');
+const bgLabel = document.getElementById('bg-label');
+let bgFiles = [];
+let currentBgIndex = -1; // -1 means "None"
+
+// Scan the local folder for images
+try {
+    const bgsPath = path.join(__dirname, 'bgs', 'dark');
+    bgFiles = fs.readdirSync(bgsPath).filter(file => file.match(/\.(jpg|jpeg|png|gif)$/i));
+} catch (err) {
+    console.error("No /bgs/dark folder found or accessible.", err);
+}
+
+function updateBackground() {
+    if (currentBgIndex === -1) {
+        bgLabel.textContent = "None";
+        document.documentElement.style.setProperty('--bg-image', 'none');
+        document.documentElement.style.setProperty('--bg-size', 'auto');
+    } else {
+        bgLabel.textContent = `Bg ${currentBgIndex + 1}`;
+        // Set the CSS variables at the root level
+        const bgPath = `./bgs/dark/${bgFiles[currentBgIndex]}`;
+        document.documentElement.style.setProperty('--bg-image', `url('${bgPath}')`);
+        document.documentElement.style.setProperty('--bg-size', 'cover');
+        document.documentElement.style.setProperty('--bg-position', 'center');
+    }
+}
+
+bgPrevBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Stops the menu from instantly closing
+    if (bgFiles.length === 0) return;
+    
+    currentBgIndex--;
+    if (currentBgIndex < -1) currentBgIndex = bgFiles.length - 1; // Loop to end
+    
+    updateBackground();
+    document.body.removeAttribute('data-theme'); // Force back to Dark Mode to see it
+});
+
+bgNextBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    if (bgFiles.length === 0) return;
+    
+    currentBgIndex++;
+    if (currentBgIndex >= bgFiles.length) currentBgIndex = -1; // Loop to None
+    
+    updateBackground();
+    document.body.removeAttribute('data-theme');
+});
+
+// =========================================
+// URL PARSER & CHAT RENDERER
+// =========================================
 function createMessageContent(text) {
     if (!text) return document.createTextNode('');
     
@@ -67,11 +125,9 @@ function createMessageContent(text) {
     let match;
 
     while ((match = urlRegex.exec(text)) !== null) {
-        // Append regular text before the URL
         if (match.index > lastIndex) {
             frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
         }
-        // Create the safe clickable link
         const a = document.createElement('a');
         a.href = match[0];
         a.textContent = match[0];
@@ -80,7 +136,6 @@ function createMessageContent(text) {
         a.style.fontWeight = 'bold';
         a.style.cursor = 'pointer';
         
-        // Hijack the click to open outside of Electron
         a.addEventListener('click', (e) => {
             e.preventDefault();
             shell.openExternal(a.href);
@@ -90,14 +145,12 @@ function createMessageContent(text) {
         lastIndex = urlRegex.lastIndex;
     }
     
-    // Append any leftover text
     if (lastIndex < text.length) {
         frag.appendChild(document.createTextNode(text.slice(lastIndex)));
     }
     return frag;
 }
 
-// UPDATED DRAW FUNCTION (Now supports images and URLs)
 function addMessageToScreen(name, text, isSystem = false, isMe = false, imageSrc = null) {
     const wrapper = document.createElement('div');
     wrapper.className = 'message-wrapper';
@@ -115,7 +168,6 @@ function addMessageToScreen(name, text, isSystem = false, isMe = false, imageSrc
         const bubbleDiv = document.createElement('div');
         bubbleDiv.className = isMe ? 'message my-message' : 'message other-message';
 
-        // Check if we are drawing an image or text
         if (imageSrc) {
             const img = document.createElement('img');
             img.src = imageSrc;
@@ -145,13 +197,15 @@ function addMessageToScreen(name, text, isSystem = false, isMe = false, imageSrc
     chatHistory.scrollTop = chatHistory.scrollHeight;
 }
 
+// =========================================
 // IMAGE PASTE INTERCEPTOR
+// =========================================
 messageInput.addEventListener('paste', (e) => {
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
     
     for (let item of items) {
         if (item.kind === 'file' && item.type.startsWith('image/')) {
-            e.preventDefault(); // Stop default pasting behavior
+            e.preventDefault(); 
             
             const blob = item.getAsFile();
             const reader = new FileReader();
@@ -162,7 +216,6 @@ messageInput.addEventListener('paste', (e) => {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
 
-                    // Crush the image down to a max width/height of 250px
                     const MAX_SIZE = 250;
                     let width = img.width;
                     let height = img.height;
@@ -179,19 +232,15 @@ messageInput.addEventListener('paste', (e) => {
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Compress into a low-quality JPEG Base64 string
                     const base64 = canvas.toDataURL('image/jpeg', 0.5); 
 
-                    // Panic switch if the file is still magically too big for UDP
                     if (base64.length > 60000) {
                         addMessageToScreen('', '[System] Image too complex. UDP rejected it.', true);
                         return;
                     }
 
-                    // Draw it locally
                     addMessageToScreen('You', '', false, true, base64);
 
-                    // Broadcast it
                     const message = Buffer.from(JSON.stringify({
                         type: 'IMAGE',
                         name: myName,
@@ -208,6 +257,10 @@ messageInput.addEventListener('paste', (e) => {
         }
     }
 });
+
+// =========================================
+// LOGIN & NETWORK
+// =========================================
 
 // THE BRUTALIST TYPOGRAPHY SCALER
 nameInput.addEventListener('input', () => {
