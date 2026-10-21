@@ -310,13 +310,15 @@ body[data-theme="toyland"] .system::after {
 
 /* MENU & INPUT BOX */
 #input-area {
-  padding: 12px;
+  padding: 18px 12px;
   background: var(--input-area-bg);
   display: flex;
   align-items: center;
   gap: 15px;
-  margin: auto 12px 0px 12px;
-  border-radius: 24px 24px 0px 0px;
+  bottom: 0;
+  border-radius: 0;
+  backdrop-filter: blur(50px) brightness(0.9);
+  -webkit-backdrop-filter: blur(50px) brightness(0.9);
 }
 
 #message-input {
@@ -395,6 +397,9 @@ body[data-theme="toyland"] .system::after {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  transform-origin: left center;
+  /* Fires the animation instantly when a message hits the DOM */
+  animation: messageBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .sender-name {
@@ -408,26 +413,18 @@ body[data-theme="toyland"] .system::after {
 @keyframes messageBounce {
   0% {
     opacity: 0;
-    transform: translateY(15px) scale(0.95);
+    transform: translateX(-30px);
   }
 
-  60% {
+  70% {
     opacity: 1;
-    transform: translateY(-2px) scale(1.02);
+    transform: translateX(3px);
   }
 
   100% {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(0);
   }
-}
-
-.message-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* Fires the animation instantly when a message hits the DOM */
-  animation: messageBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 /* BACKGROUND TOGGLER UI */
